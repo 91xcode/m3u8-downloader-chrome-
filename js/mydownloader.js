@@ -2,7 +2,7 @@ var MyDownloader = (function () {
     
 	var _data = new Map();
 	
-    const _DownloadItem = function(id, url, method, attributes, rangeBoundary){
+    const _DownloadItem = function(id, url, method, attributes, rangeBoundary, header, data){
 		this.id = id;
         this.url = url;
         this.method = method;
@@ -23,21 +23,22 @@ var MyDownloader = (function () {
         this.request = null;
         this.rangeBoundary = rangeBoundary;
         this.rangeMode = false;
+        this.header = header;
+        this.data = data;
 	}
     
     function _download(options, callback){
         const id = MyUtils.genRandomString();
-        const op = MyUtils.clone(options);
-        _data.set(id, new _DownloadItem(id, op.url, op.method, op.attributes, op.rangeBoundary));
-        if(! op.useRangeMode){
-            _downloadImpl(id, op.url, op.method, null, false, false, callback);
+        _data.set(id, new _DownloadItem(id, options.url, options.method, options.attributes, options.rangeBoundary, options.header, options.data));
+        if(! options.useRangeMode){
+            _downloadImpl(id, options.url, options.method, options.header, options.data, false, false, callback);
             return id;
         }
         const header = {
             "Range": "bytes=0-0"
         };
         // XXX loadstart run synchronously, so can not use id to do something when in_progress
-        _downloadImpl(id, op.url, op.method, header, false, true, callback);
+        _downloadImpl(id, options.url, options.method, MyUtils.extend(header, options.header), options.data, false, true, callback);
         return id;
     }
     
@@ -63,7 +64,7 @@ var MyDownloader = (function () {
         if(item.etag != null){
             header["If-Range"] = item.etag;
         }
-        _downloadImpl(id, item.url, item.method, header, true, true, callback);
+        _downloadImpl(id, item.url, item.method, MyUtils.extend(header, item.header), item.data, true, true, callback);
     }
     
     function _restart(id, callback){
@@ -74,10 +75,11 @@ var MyDownloader = (function () {
         if(item.state == "complete"){
             return ;
         }
-        const base = MyUtils.clone(item, ["id", "url", "method", "attributes", "rangeBoundary"], true);
+        const base = MyUtils.clone(item, ["id", "url", "method", "attributes", "rangeBoundary", "header"], true);
         _data.delete(id);
-        _data.set(base.id, new _DownloadItem(base.id, base.url, base.method, base.attributes, base.rangeBoundary));
-        _downloadImpl(base.id, base.url, base.method, null, false, false, callback);
+        _data.set(base.id, new _DownloadItem(base.id, base.url, base.method, base.attributes, base.rangeBoundary, base.header, item.data));
+        _downloadImpl(base.id, base.url, base.method, base.header, item.data, false, false, callback);
+        item.data = null;
     }
     
     
@@ -113,7 +115,7 @@ var MyDownloader = (function () {
     function _metric(){
         const retval = {};
         _data.forEach(function(item, id){
-            const toSend = MyUtils.clone(item, ["loadedOriginal", "content", "request", "rangeBoundary", "rangeMode"]);
+            const toSend = MyUtils.clone(item, ["loadedOriginal", "content", "request", "rangeBoundary", "rangeMode", "data"]);
             retval[id] = toSend;
         });
         return retval;
@@ -122,13 +124,13 @@ var MyDownloader = (function () {
     
     function _notify(item, callback){
         if(callback != null){
-            const toSend = MyUtils.clone(item, ["loadedOriginal", "content", "request", "rangeBoundary", "rangeMode"]);
+            const toSend = MyUtils.clone(item, ["loadedOriginal", "content", "request", "rangeBoundary", "rangeMode", "data"]);
             callback(toSend);
         }
     }
     
     
-    function _downloadImpl(id, url, method, header, isResume, useRangeMode, callback){
+    function _downloadImpl(id, url, method, header, data, isResume, useRangeMode, callback){
         
         const request = new MyXMLHttpRequest({
             method: method,
@@ -136,7 +138,7 @@ var MyDownloader = (function () {
             mimeType: "text/plain; charset=utf-8",
             header: header,
             responseType: "arraybuffer",
-            data: null,
+            data: data,
             listener: {
                 changed: function(d){
                     const item = _data.get(id);

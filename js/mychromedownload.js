@@ -45,6 +45,20 @@ var MyChromeDownload = (function () {
 		if(MyChromeConfig.get("promptWhenExist") == "1"){
 			task.options.conflictAction = "prompt";
 		}
+        
+        if(task.proxy){
+            const proxyData = {
+                url: task.options.url,
+                method: task.options.method,
+                header: MyUtils.headersToHeader(task.options.headers),
+                body: null
+            };
+            
+            task.options.url = MyChromeConfig.get("proxyAddress") + "/proxy/index";
+            task.options.method = "POST";
+            task.options.headers = [ { name: "Content-Type", value: "application/json" } ];
+            task.options.body = JSON.stringify(proxyData);
+        }
 		
 		try{
 			// sync calculate, incr firstly, decr if error

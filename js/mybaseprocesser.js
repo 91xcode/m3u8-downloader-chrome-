@@ -49,8 +49,29 @@ var MyBaseProcesser = (function () {
             method: task.options.method.toUpperCase(),
             attributes: task.custom,
             rangeBoundary: MyChromeConfig.get("downloaderPageSize"),
-            useRangeMode: task.custom == null || task.custom.useRangeMode == true
+            useRangeMode: task.custom == null || task.custom.useRangeMode == true ,
+            header: MyUtils.headersToHeader(task.options.headers),
+            data: null
         };
+        if(task.proxy){
+            const proxyData = {
+                url: options.url,
+                method: options.method,
+                header: options.header,
+                body: MyUtils.toHexString( options.data )
+            };
+            const proxyOptions = {
+                url: MyChromeConfig.get("proxyAddress") + "/proxy/index",
+                method: "POST",
+                attributes: options.attributes,
+                rangeBoundary: options.rangeBoundary,
+                useRangeMode: options.useRangeMode,
+                header: { "Content-Type": "application/json" },
+                data: JSON.stringify(proxyData)
+            };
+            
+            return MyDownloader.download(proxyOptions, _downloadCallback);
+        }
         return MyDownloader.download(options, _downloadCallback);
     }
     

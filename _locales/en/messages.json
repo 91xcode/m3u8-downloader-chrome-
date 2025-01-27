@@ -199,5 +199,8 @@
     },
     "settingsBrokenSequence": {
         "message": "stop live downloads if broken sequence"
+    },
+    "settingsProxyAddress": {
+        "message": "proxy address"
     }
 }

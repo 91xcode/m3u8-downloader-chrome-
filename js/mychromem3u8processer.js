@@ -64,7 +64,8 @@ var MyChromeM3u8Processer = (function () {
                             filename: data.downloadDirectory + "/m3u8/" + m3u8Name,
                             method: data.reqConfig.method
                         },
-                        target: "chrome"
+                        target: "chrome",
+                        proxy: true
                     });
                 }else{
                     tasks.push({

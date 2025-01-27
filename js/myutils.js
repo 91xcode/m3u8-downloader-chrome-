@@ -4,7 +4,7 @@ var MyUtils = (function(){
 		genRandomString: function() {
 			var array = new Uint32Array(1);
             crypto.getRandomValues(array);
-            return Date.now().toString() + array[0];
+            return Date.now().toString() + "0" + array[0];
 		},
 		clone: function(obj, exclusions, inverse){
             if(obj == null){
@@ -246,6 +246,25 @@ var MyUtils = (function(){
                 return (suffix == "m3u8" || suffix == "m3u");
             }
             return false;
+        },
+        extend: function(dest, src) {
+            if(dest != null && src != null){
+                for(var k in src){
+                    dest[k] = src[k];
+                }
+            }
+            return dest;
+        },
+        toHexString: function(ua){
+            if(ua instanceof Uint8Array){
+                const strArr = [];
+                ua.forEach((b) => {
+                    const hex = this.padStart(b.toString(16), 2, "0");
+                    strArr.push(hex);
+                });
+                return strArr.join("");
+            }
+            return null;
         }
     };
 })();

@@ -171,7 +171,8 @@ var MyBootstrap = (function () {
                     method: data.reqConfig.method,
                     headers: data.reqConfig.headers
                 },
-                target: "chrome"
+                target: "chrome",
+                proxy: true
             }], 
             showName: mediaName
         }, function(){
