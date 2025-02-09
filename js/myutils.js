@@ -255,16 +255,22 @@ var MyUtils = (function(){
             }
             return dest;
         },
-        toHexString: function(ua){
-            if(ua instanceof Uint8Array){
-                const strArr = [];
-                ua.forEach((b) => {
-                    const hex = this.padStart(b.toString(16), 2, "0");
-                    strArr.push(hex);
+        toHexString: function(blob, callback){
+            if(blob instanceof Blob){
+                this.readAsArrayBuffer(blob).then((buf) => {
+                    const ua = new Uint8Array(buf);
+                    const strArr = [];
+                    ua.forEach((b) => {
+                        const hex = this.padStart(b.toString(16), 2, "0");
+                        strArr.push(hex);
+                    });
+                    callback( strArr.join("") );
+                }).catch((e) => {
+                    throw e;
                 });
-                return strArr.join("");
+            }else{
+                callback(null);
             }
-            return null;
         }
     };
 })();

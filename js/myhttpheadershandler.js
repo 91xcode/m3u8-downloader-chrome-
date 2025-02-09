@@ -92,7 +92,11 @@ var MyHttpHeadersHandler = (function () {
     }
     
     
-    function _filterForbidden(headers){
+    function _filterForbidden(headers, ignoreProxy){
+        if(! ignoreProxy && MyChromeConfig.get("proxyAddressEnable") == "1"){
+            return headers;
+        }
+
         for(let r=0; headers != null && r < headers.length; r++){
             const name = headers[r].name.toLowerCase();
             if(_excludeForbiddenHeaders.has(name)
