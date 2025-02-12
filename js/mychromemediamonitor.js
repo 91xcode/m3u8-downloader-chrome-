@@ -173,6 +173,8 @@ var MyChromeMediaMonitor = (function () {
 				mediaType = "m3u8";
 			}else if(mime == "video/mp2t"){
 				return null;
+			}else if(mime == "application/vnd.yt-ump"){
+				mediaType = "video";
 			}else{
 				var type = MyUtils.getMimeType(mime);
 				if(type == "audio" || type == "video"){
@@ -200,19 +202,6 @@ var MyChromeMediaMonitor = (function () {
 				}
 			}
 		}
-        
-        if(! mediaType && urlJS){
-            for (const [k, v] of urlJS.searchParams.entries()) {
-                if(k.toLowerCase() == "mime"){
-                    const str = decodeURIComponent(v);
-                    var type = MyUtils.getMimeType(str);
-                    if(type == "audio" || type == "video"){
-                        mediaType = type;
-                        break;
-                    }
-                }
-            }
-        }
 		
 		if(mediaType){
 			var retval = { mediaType: mediaType , mime: mime };
@@ -276,7 +265,7 @@ var MyChromeMediaMonitor = (function () {
                 method: details.method,
                 url: originalUrl,
                 responseType: matcherResult.targetM3u8.responseType,
-                header: MyUtils.headersToHeader( MyHttpHeadersHandler.filterForbidden(requestData ? requestData.requestHeaders : null) ),
+                header: MyUtils.headersToHeader( MyHttpHeadersHandler.filterForbidden(requestData ? requestData.requestHeaders : null, true) ),
                 data: requestData ? requestData.requestBodyRaw : null
             });
 

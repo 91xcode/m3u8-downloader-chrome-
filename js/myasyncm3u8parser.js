@@ -1,21 +1,35 @@
 var MyAsyncM3u8Parser = function (_reqConfig) {
 
     function _getContent(callback) {
+        const uniqueKey = MyUtils.genRandomString();
+        const mediaName = MyUtils.buildMediaName("", _reqConfig.url, "");
 		
-        var xhr = new MyXMLHttpRequest({
-                method: _reqConfig.method,
-                url: _reqConfig.url,
-                header: _reqConfig.header
-            });
-
-        xhr.send({
-            error: function () {
-                callback(null);
-            },
-            success: function (data) {
-                callback(data);
-            }
+        MyBaseProcesser.saveDownloadContext({
+            id: uniqueKey,
+            completeCallback: completeCallback
         });
+        
+		MyDownload.download({
+            tasks: [{
+                options: {
+                    url: _reqConfig.url,
+                    filename: mediaName,
+                    method: _reqConfig.method,
+                    headers: _reqConfig.headers
+                },
+                target: "custom",
+                custom: { contextId: uniqueKey, useRangeMode: false }
+            }], 
+            showName: mediaName
+        }, null);
+		
+        function completeCallback(buf, context){
+            const content = new TextDecoder().decode(buf);
+            
+            MyBaseProcesser.deleteDownloadContext(context);
+            
+            callback(content);
+        }
     }
 
     this.parse = function (callback) {

@@ -22,6 +22,8 @@ var MyChromeConfig = (function () {
         downloaderPageSize: 5 * 1024 * 1024,
         convertSubtitles: "1",
         stopBrokenSequence: "1",
+        proxyAddressEnable: "0",
+        proxyAddress: "http://127.0.0.1:9052",
         matchingRuleEnable: "0",
         matchingRule:   '[\r\n' +
                         '    {\r\n         "url": {\r\n             "host": "*.googlevideo.com",\r\n             "pathname": null\r\n         },\r\n         "rule": {\r\n             "identifier": {\r\n                 "pathIndex": null,\r\n                 "queryParam": ["id"]\r\n             },\r\n             "ignorer": {\r\n                 "queryParam": ["range", "rn"]\r\n             }\r\n         }\r\n     },\r\n' +

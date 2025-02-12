@@ -36,22 +36,47 @@ var MyBaseProcesser = (function () {
      
     function _downloadDownload(task){
         MyDownload.downloadingHolder.actionIncr();
-        const id = _downloadDownloadImpl(task);
-        if(MyDownload.downloadBatchHolder.saveId(task.control.batchName, id)){
-            MyDownload.downloadingHolder.put(id, task.control);
-            MyDownload.downloadTask();
-        }
+        _downloadDownloadImpl(task, function(id){
+            if(MyDownload.downloadBatchHolder.saveId(task.control.batchName, id)){
+                MyDownload.downloadingHolder.put(id, task.control);
+                MyDownload.downloadTask();
+            }
+        });
     }
     
-    function _downloadDownloadImpl(task){
+    function _downloadDownloadImpl(task, callback){
         const options = {
             url: task.options.url,
             method: task.options.method.toUpperCase(),
             attributes: task.custom,
             rangeBoundary: MyChromeConfig.get("downloaderPageSize"),
-            useRangeMode: task.custom == null || task.custom.useRangeMode == true
+            useRangeMode: task.custom == null || (task.custom.useRangeMode == null || task.custom.useRangeMode == true) ,
+            header: MyUtils.headersToHeader(task.options.headers),
+            data: task.options.body
         };
-        return MyDownloader.download(options, _downloadCallback);
+        if(task.proxy){
+            MyUtils.toHexString(options.data, function(hex){
+                const proxyData = {
+                    url: options.url,
+                    method: options.method,
+                    header: options.header,
+                    body: hex
+                };
+                const proxyOptions = {
+                    url: MyChromeConfig.get("proxyAddress") + "/proxy/index",
+                    method: "POST",
+                    attributes: options.attributes,
+                    rangeBoundary: options.rangeBoundary,
+                    useRangeMode: options.useRangeMode,
+                    header: { "Content-Type": "application/json" },
+                    data: JSON.stringify(proxyData)
+                };
+                
+                callback( MyDownloader.download(proxyOptions, _downloadCallback) );
+            });
+        }else{
+            callback( MyDownloader.download(options, _downloadCallback) );
+        }
     }
     
     function _downloadResume(id){

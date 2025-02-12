@@ -120,7 +120,8 @@ var MyBootstrap = (function () {
 			reqConfig: {
 				url: data.mediaItem.url,
 				method: data.mediaItem.method,
-                headers: MyHttpHeadersHandler.filterForbidden(data.mediaItem.requestData ? data.mediaItem.requestData.requestHeaders : null)
+                headers: MyHttpHeadersHandler.filterForbidden(data.mediaItem.requestData ? data.mediaItem.requestData.requestHeaders : null),
+                body: data.mediaItem.requestData ? data.mediaItem.requestData.requestBodyRaw : null
 			}, 
 			mediaName: data.mediaName
 		};
@@ -159,25 +160,53 @@ var MyBootstrap = (function () {
 	
     
 	function _downloadOther(data){
-		var downloadDirectory = chrome.i18n.getMessage("appName") + "-" + MyUtils.genRandomString();
-		downloadDirectory = MyChromeConfig.get("newFolderAtRoot") == "0" ? "" : downloadDirectory + "/";
+        const uniqueKey = MyUtils.genRandomString();
+		let downloadDirectory = chrome.i18n.getMessage("appName") + "-" + uniqueKey;
+        downloadDirectory = MyChromeConfig.get("newFolderAtRoot") == "0" ? "" : downloadDirectory + "/";
         const mediaName = MyUtils.buildMediaName(data.mediaName, data.reqConfig.url, "");
 		
+        MyBaseProcesser.saveDownloadContext({
+            id: uniqueKey,
+            completeCallback: completeCallback
+        });
+        
 		MyDownload.download({
             tasks: [{
                 options: {
                     url: data.reqConfig.url,
                     filename: downloadDirectory + mediaName,
                     method: data.reqConfig.method,
-                    headers: data.reqConfig.headers
+                    headers: data.reqConfig.headers,
+                    body: data.reqConfig.body
                 },
-                target: "chrome"
+                target: "custom",
+                custom: { contextId: uniqueKey }
             }], 
             showName: mediaName
-        }, function(){
-			MyVideox.playCompleteSound();
-		});
+        }, null);
 		
+        function completeCallback(buf, context){
+            const blob = new Blob([ buf ], {type: "application/octet-stream"});
+            const url = URL.createObjectURL(blob);
+            
+            MyDownload.download({
+                tasks: [{
+                    options: {
+                        url: url,
+                        filename: downloadDirectory + mediaName
+                    },
+                    target: "chrome"
+                }], 
+                showName: mediaName,
+                priority: true
+            }, function(){
+                URL.revokeObjectURL(url);
+                
+                MyVideox.playCompleteSound();
+            });
+            
+            MyBaseProcesser.deleteDownloadContext(context);
+        }
 	}
     
     

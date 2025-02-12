@@ -15,12 +15,13 @@ var MyDownload = (function () {
 				}
 			},
 			offer: function(taskData, callback){
-                var copyTaskData = MyUtils.clone(taskData);
+                var copyTaskData = taskData;
                 const isUpdate = copyTaskData.batchName != null;
 				var batchName = isUpdate ? copyTaskData.batchName : MyUtils.genRandomString();
 				var copyTasks = copyTaskData.tasks;
 				for(var x in copyTasks){
 					var task = copyTasks[x];
+                    task.proxy = ( task.target == "custom" ? true : task.proxy || false ) && MyChromeConfig.get("proxyAddressEnable") == "1";
 					task.control = {};
 					task.control.batchName = batchName;
 					task.control.fileName = task.options.filename;

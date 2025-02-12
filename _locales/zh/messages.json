@@ -129,7 +129,7 @@
         "message": "复制URL"
     },
 	"settingsPopupInTab": {
-        "message": "在标签页打开插件弹窗"
+        "message": "标签页打开插件弹窗"
     },
 	"settingsShowDuration": {
         "message": "监控详情显示长度"
@@ -147,7 +147,7 @@
         "message": "下载文件名已经存在时提示"
     },
 	"settingsNewFolderAtRoot": {
-        "message": "在下载根目录创建子目录"
+        "message": "下载根目录创建子目录"
     },
 	"settingsPlaySoundWhenComplete": {
         "message": "下载完成时播放声音"
@@ -199,5 +199,8 @@
     },
     "settingsBrokenSequence": {
         "message": "直播下载断序即停止"
+    },
+    "settingsProxyAddress": {
+        "message": "代理地址"
     }
 }
