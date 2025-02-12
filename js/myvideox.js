@@ -84,7 +84,7 @@ var MyVideox = (function () {
 					url: options.url,
 					method: options.method,
                     relatedUrl: options.relatedUrl,
-                    header: MyUtils.headersToHeader(options.headers)
+                    headers: options.headers
 				};
 				new MyAsyncM3u8Parser(reqConfig).parse(function(result){
                     var parseResult = (result == null || result.playList == null || result.playList.length == 0) ? null : result;
@@ -98,7 +98,7 @@ var MyVideox = (function () {
                             url: parseResult.playList[0].url,
                             method: options.method,
                             relatedUrl: parseResult.playList[0].url,
-                            header: null
+                            headers: null
                         }).parse(function(result2){
                             parseResult.duration = (result2 == null || result2.playList == null || result2.playList.length == 0) ? null : result2.duration;
                             callback( parseResult );

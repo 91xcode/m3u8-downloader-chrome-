@@ -15,7 +15,7 @@ var MyDownload = (function () {
 				}
 			},
 			offer: function(taskData, callback){
-                var copyTaskData = MyUtils.clone(taskData);
+                var copyTaskData = taskData;
                 const isUpdate = copyTaskData.batchName != null;
 				var batchName = isUpdate ? copyTaskData.batchName : MyUtils.genRandomString();
 				var copyTasks = copyTaskData.tasks;

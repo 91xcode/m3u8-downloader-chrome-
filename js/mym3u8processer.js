@@ -265,7 +265,7 @@ var MyM3u8Processer = (function () {
                     reqConfig: data.reqConfig,
                     mediaName: mediaName
                 },
-                threshold: MyChromeConfig.get("processerThreshold") * 1024 * 1024,
+                threshold: parseResult.isLive ? 0 : MyChromeConfig.get("processerThreshold") * 1024 * 1024,
                 index: 0,
                 completedCnt: 0
             },
@@ -295,7 +295,8 @@ var MyM3u8Processer = (function () {
                     options: {
                         url: key.url,
                         filename: downloadDirectory + "/custom/key-" + keyRef,
-                        method: data.reqConfig.method
+                        method: data.reqConfig.method,
+                        headers: data.reqConfig.headers
                     },
                     target: "custom",
                     custom: { phase: "key", contextId: uniqueKey, keyRef: keyRef, useRangeMode: !context.isLive }
@@ -322,7 +323,8 @@ var MyM3u8Processer = (function () {
                     options: {
                         url: parseResult.playList[x].url,
                         filename: downloadDirectory + "/custom/ts-" + x,
-                        method: data.reqConfig.method
+                        method: data.reqConfig.method,
+                        headers: data.reqConfig.headers
                     },
                     target: "custom",
                     custom: { phase: "ts", contextId: uniqueKey, index: x, useRangeMode: !context.isLive }
